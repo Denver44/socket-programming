@@ -1,2 +1,7 @@
-node_modules
+.DS_Store
+node_modules/
+.cache/
+public/
+*.pem
+*.crt
 package-lock.json

@@ -1,7 +1,14 @@
 import express from "express";
-import bodyParser from "body-parser";
 import nanobuffer from "nanobuffer";
 import morgan from "morgan";
+
+const port = process.env.PORT || 3000;
+
+const app = express();
+// get express ready to run
+app.use(morgan("dev"));
+app.use(express.json());
+app.use(express.static("view"));
 
 // set up a limited array
 const msg = new nanobuffer(50);
@@ -14,23 +21,29 @@ msg.push({
   time: Date.now(),
 });
 
-// get express ready to run
-const app = express();
-app.use(morgan("dev"));
-app.use(bodyParser.json());
-app.use(express.static("frontend"));
-
 app.get("/poll", function (req, res) {
-  // use getMsgs to get messages to send back
-  // write code here
+  res.json({
+    msg: getMsgs(),
+  });
 });
 
 app.post("/poll", function (req, res) {
-  // add a new message to the server
-  // write code here
+  const { user, text } = req.body;
+  console.log("req.body  ", req.body);
+  console.log("user  ", user);
+  console.log("text  ", text);
+  msg.push({
+    user,
+    text,
+    time: Date.now(),
+  });
+
+  res.json({
+    status: "ok",
+  });
 });
 
 // start the server
-const port = process.env.PORT || 3000;
-app.listen(port);
-console.log(`listening on http://localhost:${port}`);
+app.listen(port, () => {
+  console.log(`listening on http://localhost:${port}`);
+});
