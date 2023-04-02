@@ -46,8 +46,6 @@ async function getNewMsgs() {
   render();
 }
 
-getNewMsgs();
-
 let timeToMakeNextRequest = 0;
 function checkForNewMessage() {
   requestAnimationFrame(async (time) => {
