@@ -34,28 +34,20 @@ async function postNewMsg(user, text) {
   return fetch("/poll", options);
 }
 
+// replace getNewMessages
 async function getNewMsgs() {
   let json;
   try {
     const res = await fetch("/poll");
     json = await res.json();
-  } catch (error) {
-    console.error("polling error: ", error);
+  } catch (e) {
+    // back off code would go here
+    console.error("polling error", e);
   }
   allChat = json.msg;
   render();
+  setTimeout(getNewMsgs, INTERVAL);
 }
 
+// just notice this is the last line of the doc
 getNewMsgs();
-
-let timeToMakeNextRequest = 0;
-function checkForNewMessage() {
-  requestAnimationFrame(async (time) => {
-    if (timeToMakeNextRequest <= time) {
-      await getNewMsgs();
-      timeToMakeNextRequest = time + INTERVAL;
-    }
-    checkForNewMessage();
-  });
-}
-checkForNewMessage();
