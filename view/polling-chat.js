@@ -44,7 +44,18 @@ async function getNewMsgs() {
   }
   allChat = json.msg;
   render();
-  setTimeout(getNewMsgs, INTERVAL);
 }
 
 getNewMsgs();
+
+let timeToMakeNextRequest = 0;
+function checkForNewMessage() {
+  requestAnimationFrame(async (time) => {
+    if (timeToMakeNextRequest <= time) {
+      await getNewMsgs();
+      timeToMakeNextRequest = time + INTERVAL;
+    }
+    checkForNewMessage();
+  });
+}
+checkForNewMessage();
