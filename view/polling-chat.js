@@ -1,8 +1,12 @@
 const chat = document.getElementById("chat");
 const msgs = document.getElementById("msgs");
 
-let allChat = [];
+const BACK_OFF = 5000;
 const INTERVAL = 3000;
+
+let allChat = [];
+let failedTries = 0;
+let timeToMakeNextRequest = 0;
 
 // given a user and a msg, it returns an HTML string to render to the UI
 const template = (user, msg) =>
@@ -35,27 +39,31 @@ async function postNewMsg(user, text) {
 }
 
 async function getNewMsgs() {
-  let json;
   try {
     const res = await fetch("/poll");
-    json = await res.json();
+    let json = await res.json();
+
+    if (res.status >= 400) {
+      throw new Error("request did not succeed: " + res.status);
+    } else {
+      failedTries = 0;
+      allChat = json.msg;
+      render();
+    }
   } catch (error) {
-    console.error("polling error: ", error);
+    console.error("Polling Error, ", error);
+    failedTries++;
   }
-  allChat = json.msg;
-  render();
 }
 
-getNewMsgs();
-
-let timeToMakeNextRequest = 0;
 function checkForNewMessage() {
   requestAnimationFrame(async (time) => {
     if (timeToMakeNextRequest <= time) {
       await getNewMsgs();
-      timeToMakeNextRequest = time + INTERVAL;
+      timeToMakeNextRequest = time + INTERVAL + failedTries * BACK_OFF;
     }
     checkForNewMessage();
   });
 }
+
 checkForNewMessage();
